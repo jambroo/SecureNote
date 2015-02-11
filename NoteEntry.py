@@ -20,9 +20,9 @@ class NoteEntry(tk.Tk):
         self.note.tag_configure("misspelled", foreground="red", underline=True)
 
         # Scroll bar to be placed on note input field
-        self.scrollBar.pack(in_=note_frame,side="right", fill="y", expand=False)
         self.scrollBar = tk.Scrollbar(orient="vertical", borderwidth=0,
                                 command=self.note.yview)
+        self.scrollBar.pack(in_=note_frame,side="right", fill="y", expand=False)
         self.note.configure(yscrollcommand=self.scrollBar.set)
         self.note.pack(in_=note_frame, side="left", fill="both", expand=True)
 
@@ -34,8 +34,7 @@ class NoteEntry(tk.Tk):
         # Set spell checker language to British English
         chkr = SpellChecker("en_UK")
         index = self.note.search(r'\s', "insert", backwards=True, regexp=True)
-        noteText = self.note.get("1.0", 'end')
-        if index == "" or (len(noteText) and len(noteText.split(" ")) == 1):
+        if index == "" or not " " in self.note.get("1.0", 'end'):
             index ="1.0"
         else:
             index = self.note.index("%s+1c" % index)
