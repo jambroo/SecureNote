@@ -1,6 +1,7 @@
 import Tkinter as tk
 import tkFont
 from enchant.checker import SpellChecker
+import tkMessageBox
 
 class NoteEntry(tk.Tk):
     def __init__(self):
@@ -29,6 +30,14 @@ class NoteEntry(tk.Tk):
         # Watch keystrokes on note input field and initialise focus to it
         self.note.bind("<Key>", self.Spellcheck)
         self.note.focus()
+
+        self.protocol("WM_DELETE_WINDOW", self.CloseCallback)
+
+    def CloseCallback(self):
+        if tkMessageBox.askokcancel("Save", "Save note?"):
+            # Implement encrypt and save not here
+            tkMessageBox.showinfo("Success", "Note successfully saved.")
+        self.destroy()
 
     def Spellcheck(self, event):
         # Set spell checker language to British English
