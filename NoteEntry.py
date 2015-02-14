@@ -28,18 +28,18 @@ class NoteEntry(tk.Tk):
         self.note.pack(in_=note_frame, side="left", fill="both", expand=True)
 
         # Watch keystrokes on note input field and initialise focus to it
-        self.note.bind("<Key>", self.Spellcheck)
+        self.note.bind("<Key>", self.spellcheck)
         self.note.focus()
 
-        self.protocol("WM_DELETE_WINDOW", self.CloseCallback)
+        self.protocol("WM_DELETE_WINDOW", self.closeCallback)
 
-    def CloseCallback(self):
+    def closeCallback(self):
         if tkMessageBox.askokcancel("Save", "Save note?"):
             # Implement encrypt and save not here
             tkMessageBox.showinfo("Success", "Note successfully saved.")
         self.destroy()
 
-    def Spellcheck(self, event):
+    def spellcheck(self, event):
         # Set spell checker language to British English
         chkr = SpellChecker("en_UK")
         index = self.note.search(r'\s', "insert", backwards=True, regexp=True)
