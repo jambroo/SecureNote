@@ -2,10 +2,18 @@ import Tkinter as tk
 import tkFont
 from enchant.checker import SpellChecker
 import tkMessageBox
+import md5
+import sys
+import getpass
+import struct
+from Crypto.Cipher import AES
+from Crypto import Random
 
 class NoteEntry(tk.Tk):
-    def __init__(self):
+    def __init__(self, passwdHash):
         tk.Tk.__init__(self)
+
+        self.passwdHash = passwdHash
 
         # Set to full screen mode
         self.attributes('-fullscreen', True)
@@ -29,13 +37,15 @@ class NoteEntry(tk.Tk):
 
         # Watch keystrokes on note input field and initialise focus to it
         self.note.bind("<Key>", self.spellcheck)
+
         self.note.focus()
 
         self.protocol("WM_DELETE_WINDOW", self.closeCallback)
 
     def closeCallback(self):
         if tkMessageBox.askokcancel("Save", "Save note?"):
-            # Implement encrypt and save not here
+            # Encrypt and save note here
+            self.encrypt()
             tkMessageBox.showinfo("Success", "Note successfully saved.")
         self.destroy()
 
@@ -55,6 +65,31 @@ class NoteEntry(tk.Tk):
             else:
                 self.note.tag_add("misspelled", index, "%s+%dc" % (index, len(word)))
 
+    def encrypt(self):
+        note = self.note.get("1.0", 'end').strip()
+        
+        iv = Random.new().read(AES.block_size)
+        encryptor = AES.new(self.passwdHash, AES.MODE_CBC, iv)
+        filesize = sys.getsizeof(note)
+        filename = "/tmp/test"
+
+        with open(filename, 'wb') as outfile:
+            outfile.write(struct.pack('<Q', filesize))
+            outfile.write(iv)
+ 
+            if len(note) % 16 != 0:
+                note += ' ' * (16 - len(note) % 16)
+ 
+            outfile.write(encryptor.encrypt(note))
+            outfile.close()
+        return True
+
 if __name__ == "__main__":
-    app=NoteEntry()
+    # Prompt user for password and convert to md5 hash
+    passwd = getpass.getpass()
+    m = md5.new()
+    m.update(passwd);
+    passwdHash = m.hexdigest()
+
+    app=NoteEntry(passwdHash)
     app.mainloop()
